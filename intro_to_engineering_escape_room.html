@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTRO TO ENGINEERING // Rolls-Royce Escape Room</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --bg:#050914; --panel:#0a1220; --panel2:#0d1828; --cyan:#50e6ff;
+  --cyan2:#18a8c8; --amber:#ffbf69; --green:#71f5a3; --red:#ff6b7a;
+  --text:#d9f7ff; --muted:#7694a5; --line:rgba(80,230,255,.20);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}
+body{font-family:"Space Mono",monoaeronautics;overflow:hidden}
+body:before{
+ content:"";position:fixed;inset:0;pointer-events:none;z-index:10;
+ background:linear-gradient(rgba(80,230,255,.025) 50%,transparent 50%);
+ background-size:100% 4px;mix-blend-mode:screen;opacity:.35
+}
+body:after{
+ content:"";position:fixed;inset:0;pointer-events:none;
+ background:radial-gradient(circle at 50% 0%,rgba(36,151,188,.12),transparent 45%);
+}
+#stars{position:fixed;inset:0;z-index:-3}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{
+ height:74px;border-bottom:1px solid var(--line);background:rgba(5,9,20,.85);
+ backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:aeronautics-between;
+ padding:0 28px;position:sticky;top:0;z-index:20
+}
+.brand{font-family:Orbitron;font-weight:800;letter-spacing:3px;color:var(--cyan);font-size:16px}
+.status{display:flex;gap:24px;align-items:center;font-size:11px;color:var(--muted);text-transform:uppercase}
+.status b{color:var(--green)}
+.timer{font-family:Orbitron;color:var(--amber);letter-spacing:2px}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 74px)}
+.sidebar{border-right:1px solid var(--line);padding:28px 18px;background:rgba(7,14,27,.75)}
+.mission-label{font-size:10px;color:var(--muted);letter-spacing:2px;margin:0 10px 15px}
+.stage{
+ position:relative;padding:16px 14px 16px 50px;border:1px solid transparent;margin-bottom:8px;
+ color:#5f7d8c;cursor:default;transition:.25s
+}
+.stage .num{position:absolute;left:14px;top:14px;font-family:Orbitron;font-size:11px}
+.stage .dot{position:absolute;left:38px;top:20px;width:6px;height:6px;border-radius:50%;background:#29414e}
+.stage.active{border-color:var(--line);background:rgba(80,230,255,.06);color:var(--text)}
+.stage.active .dot{background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.stage.done{color:var(--green)}
+.stage.done .dot{background:var(--green)}
+.letter{
+ position:absolute;right:12px;top:13px;border:1px solid currentColor;padding:3px 6px;
+ font-family:Orbitron;font-size:10px;opacity:.8
+}
+.core{padding:12px 3vw 8px;max-width:1180px;width:100%;margin:auto;height:calc(100vh - 74px);overflow:hidden}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:center;margin-bottom:18px}
+.kicker{font-size:10px;color:var(--cyan);letter-spacing:4px;margin-bottom:16px}
+h1,h2{font-family:Orbitron;margin:0;letter-spacing:2px}
+h1{font-size:clamp(28px,4vw,52px);line-height:1.05}
+h2{font-size:24px}
+.subtitle{color:var(--muted);line-height:1.65;max-width:680px;margin-top:14px}
+.panel{
+ background:linear-gradient(145deg,rgba(12,25,42,.92),rgba(6,14,27,.95));
+ border:1px solid var(--line);box-shadow:0 18px 70px rgba(0,0,0,.28);
+ position:relative
+}
+.panel:before,.panel:after{content:"";position:absolute;width:18px;height:18px;border-color:var(--cyan);opacity:.7}
+.panel:before{top:-1px;left:-1px;border-top:2px solid;border-left:2px solid}
+.panel:after{right:-1px;bottom:-1px;border-right:2px solid;border-bottom:2px solid}
+.dashboard{padding:20px}
+.radar{width:190px;height:190px;border:1px solid rgba(80,230,255,.35);border-radius:50%;margin:auto;position:relative;background:radial-gradient(circle,rgba(80,230,255,.08),transparent 60%)}
+.radar:before,.radar:after{content:"";position:absolute;background:rgba(80,230,255,.15)}
+.radar:before{width:1px;height:100%;left:50%;top:0}.radar:after{height:1px;width:100%;top:50%;left:0}
+.sweep{position:absolute;width:50%;height:1px;background:linear-gradient(90deg,var(--cyan),transparent);left:50%;top:50%;transform-origin:left;animation:sweep 4s linear infinite}
+.blip{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 12px var(--amber);top:31%;left:68%}
+@keyframes sweep{to{transform:rotate(360deg)}}
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.readout{border:1px solid rgba(80,230,255,.1);padding:10px}.readout small{color:var(--muted);font-size:8px}.readout strong{display:block;font-family:Orbitron;margin-top:4px;font-size:12px}
+.progress{height:5px;background:#102230;margin:12px 0 16px}.progress span{display:block;height:100%;background:var(--cyan);box-shadow:0 0 15px var(--cyan);transition:.6s}
+.stage-card{padding:18px;margin-top:10px}
+.section-head{display:flex;justify-content:aeronautics-between;gap:20px;align-items:start;margin-bottom:25px}
+.tag{font-size:9px;border:1px solid var(--line);padding:7px 10px;color:var(--cyan);white-aeronautics:nowrap}
+.prompt{font-size:13px;line-height:1.8;color:#b9d2dc;margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.choice{
+ text-align:left;padding:18px;background:#081322;color:var(--text);border:1px solid rgba(80,230,255,.16);
+ cursor:pointer;font-family:inherit;transition:.2s
+}
+.choice:hover{border-color:var(--cyan);background:#0b1b2c;transform:translateY(-2px)}
+.choice.correct{border-color:var(--green);background:rgba(113,245,163,.08)}
+.choice.wrong{border-color:var(--red);background:rgba(255,107,122,.07);animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.keybox{display:flex;gap:12px;margin-top:16px;align-items:center;flex-wrap:wrap}
+.keybox input{display:block;visibility:visible;opacity:1;position:relative;z-index:2;
+ width:72px;height:54px;text-align:center;text-transform:uppercase;background:#030812;color:var(--cyan);
+ border:1px solid var(--cyan);font:700 24px Orbitron;outline:none
+}
+.btn{
+ border:1px solid var(--cyan);background:rgba(80,230,255,.08);color:var(--cyan);
+ padding:15px 20px;font:700 11px Orbitron;letter-spacing:1.5px;cursor:pointer;transition:.2s
+}
+.btn:hover{background:var(--cyan);color:#03101a;box-shadow:0 0 25px rgba(80,230,255,.3)}
+.feedback{min-height:23px;font-size:11px;margin-top:13px;color:var(--muted)}
+.feedback.ok{color:var(--green)}.feedback.err{color:var(--red)}
+.hidden{display:none!important}
+.scenario{padding:18px;border:1px solid rgba(80,230,255,.12);margin-bottom:12px}
+.scenario h3{font:600 12px Orbitron;margin:0 0 9px;color:var(--amber)}
+.final{
+ text-align:center;padding:45px 25px;background:radial-gradient(circle at center,rgba(80,230,255,.08),transparent 65%)
+}
+.code-display{font:800 44px Orbitron;letter-spacing:12px;color:var(--cyan);margin:30px 0;text-shadow:0 0 25px rgba(80,230,255,.5)}
+.fragments{display:flex;justify-content:center;gap:8px;margin:20px 0}.frag{width:48px;height:48px;border:1px solid var(--line);display:grid;place-items:center;font:700 18px Orbitron;color:var(--amber)}
+.log{font-size:9px;color:var(--muted);line-height:1.8;margin-top:20px}
+.footer{text-align:center;color:#3e5b68;font-size:9px;letter-spacing:2px;padding:10px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{display:none}.hero{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.core{padding:30px 18px}}
+ 
+.engine-display{padding:18px;min-height:225px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.engine-ring{width:170px;height:170px;border:1px solid rgba(80,230,255,.35);border-radius:50%;position:relative;background:radial-gradient(circle,rgba(80,230,255,.08),transparent 62%)}
+.engine-ring:before{content:"";position:absolute;inset:12px;border:1px solid rgba(255,191,105,.28);border-radius:50%}
+.fan{position:absolute;left:50%;top:50%;width:110px;height:4px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);transform-origin:center}
+.fan1{transform:translate(-50%,-50%) rotate(0deg)}
+.fan2{transform:translate(-50%,-50%) rotate(60deg)}
+.fan3{transform:translate(-50%,-50%) rotate(120deg)}
+.engine-core{position:absolute;width:34px;height:34px;border:2px solid var(--amber);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 0 24px rgba(255,191,105,.3)}
+.engine-caption{font:10px Orbitron;color:var(--muted);letter-spacing:2px;margin-top:12px}
+.timeout-overlay{position:fixed;inset:0;background:rgba(2,6,14,.92);z-index:100;display:grid;place-items:center}
+.timeout-card{width:min(520px,90vw);padding:42px;text-align:center;border:1px solid var(--red);background:#08111f;box-shadow:0 0 60px rgba(255,107,122,.15)}
+.timeout-card h2{color:var(--red);font-size:22px;margin-bottom:18px}
+.timeout-card p{color:var(--muted);line-height:1.8;font-size:12px;margin-bottom:25px}
+.restart-top{border:1px solid rgba(255,191,105,.6);background:rgba(255,191,105,.06);color:var(--amber);padding:7px 10px;font:700 9px Orbitron;letter-spacing:1px;cursor:pointer}.restart-top:hover{background:var(--amber);color:#07101a}
+.timeout-card .btn{margin-top:5px}
+</style>
+
+<style>
+@media (max-width:700px){
+  html,body{overflow:hidden!important;height:100%;width:100%}
+  .topbar{height:44px;padding:0 8px}
+  .brand{font-size:7px;max-width:135px}
+  .status{gap:5px;font-size:7px}
+  .status span:nth-child(2){display:none}
+  .restart-top{font-size:7px;padding:6px}
+  .layout{height:calc(100vh - 44px);display:block}
+  .sidebar{
+    width:100%;height:78px;padding:5px;
+    border-right:0;border-bottom:1px solid var(--line);
+    display:flex;gap:3px;overflow:hidden
+  }
+  .mission-label,.log{display:none}
+  .stage{
+    flex:1;min-width:0;height:67px;min-height:67px;margin:0;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    gap:3px;padding:3px 1px;text-align:center;font-size:5.8px;letter-spacing:0
+  }
+  .stage .num{font-size:7px}.stage .dot{width:5px;height:5px}.stage .letter{font-size:6px}
+  .core{height:calc(100% - 78px)!important;padding:7px 7px 3px!important;overflow:hidden!important}
+  .hero{grid-template-columns:1fr 72px;gap:7px;margin-bottom:5px}
+  .kicker{font-size:6px;letter-spacing:.9px}
+  h1{font-size:21px;margin:3px 0}
+  .subtitle{font-size:7px}
+  .dashboard{min-height:72px}
+  .engine-display{padding:5px}
+  .engine-ring{width:54px;height:54px}
+  .engine-ring:before{inset:5px}
+  .fan{width:36px}
+  .engine-core{width:13px;height:13px}
+  .engine-caption{font-size:4.5px;margin-top:3px}
+  .progress{height:3px;margin-bottom:5px}
+  .stage-card{padding:13px 10px;min-height:0;overflow:hidden}
+  h2{font-size:17px}
+  .prompt{font-size:9px;line-height:1.35;margin:9px 0}
+  .keybox{gap:6px;margin-top:10px;flex-wrap:nowrap}
+  .keybox input{width:58px;height:46px;font-size:19px}
+  .btn{min-height:46px;padding:9px 10px;font-size:7px}
+  .feedback{font-size:7px;margin-top:8px}
+  .fragments{gap:4px;margin:10px 0}
+  .frag{width:34px;height:34px;font-size:14px}
+  .final .keybox{flex-wrap:wrap}
+  .final .keybox span{width:100%;text-align:center}
+  .final .keybox input{width:150px;margin:auto}
+  .final .keybox .btn{width:150px;margin:auto}
+  .code-display{font-size:30px;margin:8px 0}
+  .footer{font-size:5.5px;padding:2px 0}
+}
+@media(max-width:380px){
+  .stage{font-size:5.2px}.stage .letter{display:none}
+  .hero{grid-template-columns:1fr 62px}
+  .dashboard{min-height:62px}
+  .engine-ring{width:46px;height:46px}.fan{width:31px}.engine-core{width:11px;height:11px}
+  h1{font-size:19px}.keybox input{width:52px}.btn{padding:8px}
+}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="app">
+<header class="topbar">
+  <div class="brand">INTRO TO ENGINEERING // ROLLS-ROYCE ESCAPE ROOM</div>
+  <div class="status"><span>SYS <b>ONLINE</b></span><span>SECTOR: AERO-07</span><span class="timer" id="timer">02:00</span><button class="restart-top" onclick="restartMission()">RESTART</button></div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+<p class="mission-label">MISSION SEQUENCE</p>
+<div class="stage active" id="nav0"><span class="num">01</span><span class="dot"></span>SPOT THE DIFFERENCE<span class="letter">R</span></div>
+<div class="stage" id="nav1"><span class="num">02</span><span class="dot"></span>WORD SEARCH<span class="letter">O</span></div>
+<div class="stage" id="nav2"><span class="num">03</span><span class="dot"></span>CALCULATIONS<span class="letter">P</span></div>
+<div class="stage" id="nav3"><span class="num">04</span><span class="dot"></span>THE QUIZ<span class="letter">E</span></div>
+<div class="stage" id="nav4"><span class="num">05</span><span class="dot"></span>PIN THE ROTOR<span class="letter">W</span></div>
+<div class="stage" id="nav5"><span class="num">06</span><span class="dot"></span>FINAL WORD<span class="letter">?</span></div>
+<div class="stage" id="nav6"><span class="num">07</span><span class="dot"></span>UNLOCKED<span class="letter">LOCK</span></div>
+<div class="log">ENGINE MODULE<br>&gt; 5 stage keys<br>&gt; 1 final word<br>&gt; 1 unlocked experience</div>
+</aside>
+
+<main class="core">
+<section class="hero">
+  <div>
+    <div class="kicker">ROLLS-ROYCE // PIN THE ROTOR</div>
+    <h1>INTRO TO<br><span style="color:var(--cyan)">ENGINEERING</span></h1>
+    <p class="subtitle">ESCAPE ROOM // ENTER THE KEY TO ADVANCE.</p>
+  </div>
+  <div class="panel dashboard engine-display">
+    <div class="engine-ring"><div class="fan fan1"></div><div class="fan fan2"></div><div class="fan fan3"></div><div class="engine-core"></div></div>
+    <div class="engine-caption">AERO ENGINE // READY</div>
+  </div>
+</section>
+
+<div class="progress"><span id="progress" style="width:20%"></span></div>
+
+<section id="stage0" class="panel stage-card">
+<div class="section-head"><div><div class="kicker">STAGE 01</div><h2>SPOT THE DIFFERENCE</h2></div></div>
+<p class="prompt">Enter the key to continue.</p>
+<div class="keybox"><span>KEY</span><input id="in0" maxlength="1" autocomplete="off" placeholder="_"><button class="btn" onclick="unlock(0,'R')">CONTINUE</button></div><div class="feedback" id="fb0"></div>
+</section>
+
+<section id="stage1" class="panel stage-card hidden">
+<div class="section-head"><div><div class="kicker">STAGE 02</div><h2>WORD SEARCH</h2></div></div>
+<p class="prompt">Enter the key to continue.</p>
+<div class="keybox"><span>KEY</span><input id="in1" maxlength="1" autocomplete="off" placeholder="_"><button class="btn" onclick="unlock(1,'O')">CONTINUE</button></div><div class="feedback" id="fb1"></div>
+</section>
+
+<section id="stage2" class="panel stage-card hidden">
+<div class="section-head"><div><div class="kicker">STAGE 03</div><h2>CALCULATIONS</h2></div></div>
+<p class="prompt">Enter the key to continue.</p>
+<div class="keybox"><span>KEY</span><input id="in2" maxlength="1" autocomplete="off" placeholder="_"><button class="btn" onclick="unlock(2,'P')">CONTINUE</button></div><div class="feedback" id="fb2"></div>
+</section>
+
+<section id="stage3" class="panel stage-card hidden">
+<div class="section-head"><div><div class="kicker">STAGE 04</div><h2>THE QUIZ</h2></div></div>
+<p class="prompt">Enter the key to continue.</p>
+<div class="keybox"><span>KEY</span><input id="in3" maxlength="1" autocomplete="off" placeholder="_"><button class="btn" onclick="unlock(3,'E')">CONTINUE</button></div><div class="feedback" id="fb3"></div>
+</section>
+
+<section id="stage4" class="panel stage-card hidden">
+<div class="section-head"><div><div class="kicker">STAGE 05</div><h2>PIN THE ROTOR</h2></div></div>
+<p class="prompt">Enter the key to continue.</p>
+<div class="keybox"><span>KEY</span><input id="in4" maxlength="1" autocomplete="off" placeholder="_"><button class="btn" onclick="unlock(4,'W')">CONTINUE</button></div><div class="feedback" id="fb4"></div>
+</section>
+
+<section id="stage5" class="panel stage-card hidden final">
+<div class="kicker">FINAL CHALLENGE</div><h2>UNSCRAMBLE THE KEY</h2>
+<p class="prompt">The five recovered letters are:</p>
+<div class="fragments"><div class="frag">P</div><div class="frag">E</div><div class="frag">W</div><div class="frag">R</div><div class="frag">O</div></div>
+<p class="prompt">Enter the unscrambled word.</p>
+<div class="keybox" style="justify-content:center"><span>WORD</span><input id="finalInput" maxlength="5" autocomplete="off" placeholder="_____"><button class="btn" onclick="finalUnlock()">UNLOCK</button></div>
+<div class="feedback" id="finalFb"></div>
+</section>
+
+<section id="stage6" class="panel stage-card hidden final">
+<div class="kicker">CONGRATULATIONS</div>
+<div class="code-display">UNLOCKED</div>
+<h2>INTRO TO ENGINEERING</h2>
+<p class="subtitle" style="margin:14px auto">MISSION COMPLETE.</p>
+<p style="color:var(--amber);font-family:Orbitron;font-size:13px;line-height:1.7">Discuss your next steps into the world of engineering with our representatives</p>
+<div style="margin-top:20px;font-family:Orbitron;font-weight:800;letter-spacing:5px;font-size:18px">ROLLS-ROYCE</div>
+</section>
+
+<div class="footer">AERONAUTICS ENGINEERING // PIN THE ROTOR EXPERIENCE // ROLLS-ROYCE</div>
+</main>
+</div>
+</div>
+
+<script>
+let time=120,timerExpired=false;
+
+function tick(){
+  if(time<=0){
+    if(!timerExpired){
+      timerExpired=true;
+      document.getElementById("timer").textContent="00:00";
+      document.getElementById("timeoutOverlay").classList.remove("hidden");
+    }
+    return;
+  }
+  time--;
+  document.getElementById("timer").textContent=
+    String(Math.floor(time/60)).padStart(2,"0")+":"+String(time%60).padStart(2,"0");
+}
+setInterval(tick,1000);
+
+function restartMission(){
+  location.reload();
+}
+
+function resetStageTimer(){
+  time=120;
+  timerExpired=false;
+  document.getElementById("timer").textContent="02:00";
+}
+
+function unlock(i,expected){
+  if(timerExpired)return;
+  const input=document.getElementById("in"+i);
+  const fb=document.getElementById("fb"+i);
+  if(input.value.toUpperCase().trim()!==expected){
+    fb.textContent="✕ INCORRECT KEY";
+    fb.className="feedback err";
+    input.focus();
+    return;
+  }
+  fb.textContent="✓ ACCESS GRANTED";
+  fb.className="feedback ok";
+  document.getElementById("nav"+i).classList.add("done");
+
+  setTimeout(()=>{
+    document.getElementById("stage"+i).classList.add("hidden");
+    document.getElementById("stage"+(i+1)).classList.remove("hidden");
+    document.getElementById("nav"+(i+1)).classList.add("active");
+    document.getElementById("progress").style.width=((i+2)/7*100)+"%";
+    resetStageTimer();
+    const next=document.getElementById(i+1===5?"finalInput":"in"+(i+1));
+    if(next)next.focus();
+  },250);
+}
+
+function finalUnlock(){
+  if(timerExpired)return;
+  const input=document.getElementById("finalInput");
+  const fb=document.getElementById("finalFb");
+  if(input.value.toUpperCase().replace(/\s/g,"")!=="POWER"){
+    fb.textContent="✕ INCORRECT WORD";
+    fb.className="feedback err";
+    input.focus();
+    return;
+  }
+  timerExpired=true;
+  fb.textContent="✓ FINAL WORD ACCEPTED";
+  fb.className="feedback ok";
+  document.getElementById("nav5").classList.add("done");
+  document.getElementById("nav5").querySelector(".letter").textContent="✓";
+  setTimeout(()=>{
+    document.getElementById("stage5").classList.add("hidden");
+    document.getElementById("stage6").classList.remove("hidden");
+    document.getElementById("nav6").classList.add("active","done");
+    document.getElementById("nav6").querySelector(".letter").textContent="OPEN";
+    document.getElementById("progress").style.width="100%";
+  },400);
+}
+
+const canvas=document.getElementById("stars"),ctx=canvas.getContext("2d");
+let stars=[];
+function resize(){
+  canvas.width=innerWidth;canvas.height=innerHeight;
+  stars=Array.from({length:110},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.2,v:Math.random()*.2+.04}));
+}
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="rgba(130,220,255,.6)";
+  stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();s.y+=s.v;if(s.y>canvas.height)s.y=0});
+  requestAnimationFrame(draw);
+}
+addEventListener("resize",resize);resize();draw();
+</script>
+<div id="timeoutOverlay" class="timeout-overlay hidden">
+  <div class="timeout-card">
+    <div class="kicker">TIME LIMIT REACHED</div>
+    <h2>ENGINEERING SIMULATION PAUSED</h2>
+    <p>The 2-minute stage window has expired. Restart the mission to try again.</p>
+    <button class="btn" onclick="restartMission()">RESTART MISSION</button>
+  </div>
+</div>
+</body>
+</html>
